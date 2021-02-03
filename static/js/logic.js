@@ -1,3 +1,11 @@
+//Prepare data for drawing tectonic plates
+var geoJsonPlates = null;
+var plates = d3.json("static/data/plates.json").then((data) => {
+  console.log(data);
+  geoJsonPlates = data;
+
+});
+
 // Creating map object
 var myMap = L.map("mapid", {
   center: [37.09, -95.71],
@@ -17,27 +25,6 @@ var streetMap = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.p
 // Use this link to get the geojson data.
 var link = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_month.geojson";
 
-var plateStyle = {
-  color: "orange",
-  weight: 1.5
-};
-
-var plates = d3.json("static/data/plates.json").then(function(data){
-  console.log(data)
-  L.geoJson(data, { 
-    onEachFeature: function(feature, layer) {
-        // Set mouse events to change map styling
-        layer.on({
-        
-          // When a feature (neighborhood) is clicked, it is enlarged to fit the screen
-          click: function(event) {
-            myMap.fitBounds(event.target.getBounds());
-          }
-        });
-      }
-    }
-  )}
-);
 
 
 // Function that will determine the color of a neighborhood based on the borough it belongs to
@@ -59,9 +46,9 @@ function chooseColor(value) {
 }
 
 // Grabbing our GeoJSON data..
-var quakeMarker = d3.json(link).then(function(data) {
+d3.json(link).then(function(data) {
   // Creating a geoJSON layer with the retrieved data
-  L.geoJson(data, {
+  var quakeMarker = L.geoJson(data, {
     // Style each feature (in this case a neighborhood)
     pointToLayer: function(feature, latlng) {
       return L.circleMarker(latlng);
@@ -89,6 +76,7 @@ var quakeMarker = d3.json(link).then(function(data) {
   }).addTo(myMap);
 
   var quakeLayer = L.layerGroup(quakeMarker);
+ 
 
   // Define variables for our tile layers
 
@@ -122,7 +110,6 @@ legend.onAdd = function (map) {
         grades = [-10, 10, 30, 50, 70, 90],
         labels = [];
         colors = ["green", "yellowgreen", "yellow", "orange", "orangered", "red"];
-
     // loop through our density intervals and generate a label with a colored square for each interval
     for (var i = 0; i < grades.length; i++) {
         div.innerHTML +=
